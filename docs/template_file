@@ -1,0 +1,123 @@
+
+# 01. SSH client and server configs
+
+### Lab Objective
+
+Ansible uses Secure Shell (ssh) as the underlying transport mechanism for interacting with remote linux systems.
+This lab introduces the client and server (ssh, sshd) and their respective configuration files.
+
+### Procedure
+
+ 0. Take a moment to clean up your Remote Desktop. For now, close all other terminal spaces or windows you might have open.
+
+ 0. Open a new terminal by clicking the *monitor* icon at the bottom of your screen. Then change directory to the `/home/student/` directory.
+
+    `student@beachhead:/$` `cd ~`  
+
+    ```
+          The "beatles" machines are the ansible hosts you will be accessing just
+          for today. Tomorrow, you will access a new set of hosts.
+    +-----------+ +-----------+ +-----------+ +-----------+ +-----------+ +-----------+
+    |   john    | |   paul    | |  george   | |   stuart  | |   pete    | |   ringo   |
+    | 10.10.1.2 | | 10.10.1.3 | | 10.10.1.4 | | 10.10.1.5 | | 10.10.1.6 | | 10.10.1.7 |
+    +-----+-----+ +-----+-----+ +-----+-----+ +-----+-----+ +-----+-----+ |------+----|
+          |             |             |             |             |              |
+          |             |             |             |             |              |
+          +-------------+-------------+------+------+-------------+--------------+
+                                             |
+                                   +---------+---------+
+                                   |     Beachhead     |
+             You are here  ------> |   Ansible Control |
+                                   |      Machine      |
+                                   +-------------------+
+    ```
+    > This diagram shows where you are at within the virtual environment, and the ansible hosts you will be interacting with throughout the day. Each host will present a new experience. 
+    
+ 0. If this is the first time working in this lab, **SKIP THIS STEP**. If you are coming back to this lab from another lab for some more practice, let's ensure we have a clean environment to work with by downloading and running the `max_teardown.sh` script.
+ 
+    `student@beachhead:~$` `wget https://alta3.com/static/projects/ansible/max_teardown.sh -O max_teardown.sh`  
+    `student@beachhead:~$` `bash max_teardown.sh`  
+    
+ 0. Download and run the lab setup script. The first time running this command may take at least 10 minutes. Your instructor should have you start this command before a break. All future runs of the setup for the ssh101 block should complete quickly. This will set up the  lab environment for you. 
+
+    `student@beachhead:~$` `wget https://alta3.com/static/projects/ansible/ssh101/setup.sh -O setup.sh`  
+    `student@beachhead:~$` `bash setup.sh`  
+  
+    
+ 0. Ping the lab host john at 10.10.1.2
+
+    `student@beachhead:~$` `ping -c 1 10.10.1.2`  
+
+ 0. Now let's connect to the remote host with secure shell.
+ 
+    > As ssh connects you will be be told that we are accepting the remote public key.  If prompted to accept the public key select **Yes** and then type the password **alta3**.
+
+    `student@beachhead:~$` `ssh john@10.10.1.2`  
+
+
+ 0. You are about to look at an SSH configuration, and you will need a reference. Here are two options:
+
+    open a browser to:  `https://www.freebsd.org/cgi/man.cgi?sshd_config(5)`  
+       or  
+    open a terminal man page: `john@john:~$` `man sshd_config`  
+    
+    > Type `q` to exit out of a man page.
+
+ 0. Open up the ssh service configuration file `/etc/ssh/sshd_config` and answer the following questions.
+    Use the man pages for additional reference.
+
+    `john@john:~$` `view /etc/ssh/sshd_config`   
+
+    * What is the value of PubkeyAuthentication?
+    * Does this system allow `root` to login (`PermitRootLogin`)? 
+    * Does this system display a Message of the Day (`PrintMotd`)?
+    * What configuration parameter would we set to disable password based authentication?
+    * What port is this service listening on?
+
+ 0. Exit the file with `:q` (a colon followed by the letter q) and then pressing **Enter** 
+ 
+ 0. Exit the session on `john`  
+ 
+    `john@john:~$` `exit`  
+
+ 0. Examine the man page for `ssh_config` and answer the following questions.
+
+    `student@beachhead:~$` `man ssh_config`  
+ 
+    * What two files are read for configuration information when invoking the `ssh` client command?
+    * What is the default value of StrictHostKeyChecking? What does this mean? (see note below!)
+
+    > To search, say for "StrictHostKeyChecking" you can type `/StrictHostKeyChecking` and all instances of this string are hightlighted. Then type `n` for the next instance or `b` for back one instance.
+
+ 0.  Append the below ssh configuration file for the john host.
+ 
+    > Hint:  
+    > - Highlight the below text by triple clicking on the word **Host**.  
+    > - Switch over to your terminal.  
+    > - Within the config file, type i and hit enter.   
+    > - Then right-click and click paste.  
+    > - Hit the esc key, and then type :wq to save your changes.
+     
+     `student@beachhead:~$` `vim ~/.ssh/config`  
+ 
+     ```  
+     Host john
+       HostName 10.10.1.2 
+       User john
+       StrictHostKeyChecking no 
+       UserKnownHostsFile=/dev/null
+     ```  
+
+ 0. ssh to the john host with the simplifed command. To be clear, you'll still need to input **alta3** as the password, but no longer be prompted to accept a host key, nor do you need to indicate the IP address of the host.
+
+    `student@beachhead:~$` `ssh john`  
+    `john@john:~$` `whoami`  
+    `john@john:~$` `exit`  
+
+ 0. Great job! Tear down your lab. This will help setup for a clean environment during the next, and subsequent labs.
+  
+    `student@beachhead:~$` `wget https://alta3.com/static/projects/ansible/max_teardown.sh -O max_teardown.sh`  
+    `student@beachhead:~$` `bash max_teardown.sh`  
+
+    > **For your convenience, and to assist in the avoidance of Fail Whales, we have placed the commands to download and run the teardown script at the beginning of future lab assignments.**
+    
